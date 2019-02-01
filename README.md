@@ -1,6 +1,7 @@
-# PProgress: A progress bar for parallel for loops with MP
+# PProgress: A progress bar for parallel for loops with MPI
+### By Fergus Horrobin - fergus.horrobin@mail.utoronto.ca
 
-## FEATURES
+## Features
 
 Provides an all purpose Python based progress bar utility that can be run in
 loops either running in serial or parallel with MPI or other utilities.
