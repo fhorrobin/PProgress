@@ -1,1 +1,2 @@
-from .Progress import ProgressBar
+name = "PProgress"
+from .progress import ProgressBar
