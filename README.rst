@@ -1,6 +1,9 @@
 PProgress: A progress bar for parallel for loops with MPI
 =========================================================
 
+.. image:: https://badge.fury.io/py/PProgress.svg
+    :target: https://badge.fury.io/py/PProgress
+
 Features
 --------
 
