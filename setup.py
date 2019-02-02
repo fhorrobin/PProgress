@@ -3,7 +3,7 @@ import setuptools
 
 setup(
     name='PProgress',
-    version='0.0.4',
+    version='0.0.5',
     author="Fergus Horrobin",
     author_email="fergus.horrobin@mail.utoronto.ca",
     description="Simple Python progress bar for parallel programs.",
