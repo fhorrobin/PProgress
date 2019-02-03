@@ -7,6 +7,7 @@ be used to show multiple progress bars when a program is run in parallel.
 """
 import sys
 import time
+import warnings
 
 
 class ProgressBar:
@@ -16,20 +17,20 @@ class ProgressBar:
 
     Attributes
     ----------
-    iterations : int
+    -iterations : int
         The toal number of iterations until completion. If more than one process
         is specified, this number is divided by size (number of processes).
     prefix : str
         The prefix string for the progress bar.
-    iteration : int
+    -iteration : int
         The current iteration number.
     fill : str
         The character to fill the bar with.
     length : int
         The length of the progress bar.
-    rank : int
+    -rank : int
         The rank of the process (0 if there is only 1 process).
-    size : int
+    -size : int
         The number of processes running PProgress bars.
     time : float
         The clock time of the last update.
@@ -39,8 +40,11 @@ class ProgressBar:
         Show the total time as well as time per iteration if True.
     """
 
-    def __init__(self: 'ProgressBar', iterations: int, **kwargs) -> None:
+    def __init__(self: 'ProgressBar', iterations: int, iteration=0, rank=0,
+            size=1, **kwargs) -> None:
         """
+        Constructor for ProgressBar object.
+
         Initialize a PProgress bar object. Specify the total number of
         iterations and any other parameters to specify the behaviour of the
         progress bar.
@@ -70,38 +74,36 @@ class ProgressBar:
             The start time of the process.
         show_time : bool (Default False)
             Show the total time as well as time per iteration if True.
+
+        Requires
+        ---------
+        size == total number of processes.
         """
 
-        if 'prefix' not in kwargs:
-            kwargs['prefix'] = "Progress"
-        if 'iteration' not in kwargs:
-            kwargs['iteration'] = 0
-        if 'fill_char' not in kwargs:
-            kwargs['fill_char'] = '█'
-        if 'length' not in kwargs:
-            kwargs['length'] = 30
-        if 'show_time' not in kwargs:
-            kwargs['show_time'] = False
+        format_params = {
+            "prefix": "progress",
+            "fill_char": "█",
+            "length": 30,
+            "show_time": False
+        }
 
-        self.__show_time = kwargs['show_time']
+        for (key, item) in kwargs.items():
+            if key in format_params:
+                format_params[key] = item
+            else:
+                warnings.warn(f"Urecognized key-word argument: {key}.")
+
+        self.__format = format_params
         self.__iterations = iterations
-        self.__prefix = kwargs['prefix']
-        self.__iteration = kwargs['iteration']
-        self.__fill = kwargs['fill_char']
-        self.__length = kwargs['length']
-        self.__rank = 0
-        self.__size = 1
+        self.__iteration = iteration
+        self.__rank = rank
+        self.__size = size
         self.__start_time = time.time()
         self.__time = time.time()
 
-        if ('rank' in kwargs and 'size'
-                not in kwargs) or ('size' in kwargs and 'rank' not in kwargs):
-            raise Exception("If using MPI must pass rank and size.")
-
-        if 'rank' in kwargs:
-            self.__rank = kwargs['rank']
-            self.__prefix += f" (process {self.__rank})"
-            self.__size = kwargs['size']
+        # If there is more than one process
+        if size > 1:
+            self.__format['prefix'] += f" (process {self.__rank})"
             self.__iterations = self.__iterations / float(self.__size)
 
     def done(self: 'ProgressBar') -> None:
@@ -136,7 +138,7 @@ class ProgressBar:
 
         self.__iteration += increment
         percent = self.__iteration / float(self.__iterations) * 100
-        fill_length = int(self.__length * self.__iteration // self.__iterations)
+        fill_length = int(self.__format['length'] * self.__iteration // self.__iterations)
 
         self.__time = time.time()
         elapsed_time = self.__time - self.__start_time
@@ -151,11 +153,10 @@ class ProgressBar:
         Write the progress bar to the screen.
         """
 
-        fill = self.__fill * filled_length + " " * (self.__length -
-                                                    filled_length)
+        fill = self.__format['fill_char'] * filled_length + " " * (self.__format['length'] - filled_length)
 
-        pbar = f"\r{self.__prefix}: |{fill}| {percent: 3.1f}% {rate: .2f} s/it"
-        if self.__show_time:
+        pbar = f"\r{self.__format['prefix']}: |{fill}| {percent: 3.1f}% {rate: .2f} s/it"
+        if self.__format['show_time']:
             pbar += f" total: {elapsed_time:.2f} s"
 
         for _ in range(self.__rank):
