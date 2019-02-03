@@ -1,4 +1,4 @@
-PProgress: A progress bar for parallel for loops with MPI
+PProgress: A progress bar that works with MPI
 =========================================================
 
 .. image:: https://badge.fury.io/py/PProgress.svg
@@ -14,7 +14,7 @@ loops either running in serial or parallel with MPI or other utilities.
  * The progress bar shows the percent completion of the tasks assigned to that process.
  * If there are multiple processes, all progress bars remain until the final onefinishes.
 
-Installation
+Quick Start
 --------------
 
 PProgess can simply be install using pip as:
@@ -34,7 +34,6 @@ Then you can try out a simple serial example as:
         pb.update()
         sleep(0.1)
     pb.done()
-
 
 
 
